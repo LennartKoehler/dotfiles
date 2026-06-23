@@ -56,9 +56,11 @@ dotfiles/
 └── Makefile
 ```
 
-## Adding opencode submodule
+## opencode
 
-```bash
-git submodule add <opencode-repo-url> opencode
-make link
-```
+The opencode config is a git submodule pointing to [my-opencode-config](https://github.com/LennartKoehler/my-opencode-config).
+It gets symlinked as a whole directory (`~/.config/opencode` -> `dotfiles/opencode/.config/opencode`).
+
+Skills are managed separately via `skills-lock.json` inside the submodule.
+
+If `~/.config/opencode` already exists as a real directory, `make link` will back it up before symlinking.

@@ -1,5 +1,5 @@
 STOW_PACKAGES = nvim tmux kitty bash
-STOW = stow --target=$(HOME) --dotfiles --no-folding --adopt
+STOW = stow --target=$(HOME) --dotfiles --no-folding
 
 .PHONY: all install deps link unlink update clean
 
@@ -25,24 +25,33 @@ link:
 		echo "Stowing $$pkg..."; \
 		$(STOW) $$pkg 2>/dev/null || echo "  (skipped or already linked)"; \
 	done
+	@if [ -d opencode/.config/opencode ]; then \
+		echo "Stowing opencode..."; \
+		if [ -d $(HOME)/.config/opencode ] && [ ! -L $(HOME)/.config/opencode ]; then \
+			echo "  WARNING: ~/.config/opencode exists and is not a symlink. Backing up..."; \
+			mv $(HOME)/.config/opencode $(HOME)/.config/opencode.bak.$$(date +%s); \
+		fi; \
+		stow --target=$(HOME) --dotfiles opencode 2>/dev/null || echo "  (skipped or already linked)"; \
+	fi
 	@./scripts/setup-bashrc.sh
 
 unlink:
-	@for pkg in $(STOW_PACKAGES); do \
+	@for pkg in $(STOW_PACKAGES) opencode; do \
 		echo "Unstowing $$pkg..."; \
 		stow -D --target=$(HOME) --dotfiles $$pkg 2>/dev/null || true; \
 	done
-	@echo "Run: stow -D --target=$(HOME) --dotfiles opencode"
 
 update:
 	@echo "Pulling latest..."
 	@git pull --recurse-submodules
+	@git submodule update --remote --merge
 	@for pkg in $(STOW_PACKAGES); do \
 		echo "Restowing $$pkg..."; \
 		stow -R --target=$(HOME) --dotfiles --no-folding $$pkg 2>/dev/null || true; \
 	done
+	@stow -R --target=$(HOME) --dotfiles opencode 2>/dev/null || true
 
 clean:
-	@for pkg in $(STOW_PACKAGES); do \
+	@for pkg in $(STOW_PACKAGES) opencode; do \
 		stow -D --target=$(HOME) --dotfiles $$pkg 2>/dev/null || true; \
 	done
