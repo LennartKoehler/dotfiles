@@ -1,0 +1,15 @@
+*.swp
+*.swo
+*~
+.DS_Store
+
+# nvim
+nvim/.config/nvim/plugin/packer_compiled.lua
+nvim/.config/nvim/lua/theprimeagen/lazy/local.lua
+
+# opencode
+opencode/node_modules/
+opencode/package.json
+opencode/package-lock.json
+opencode/bun.lock
+opencode/opencode-notifier-state.json

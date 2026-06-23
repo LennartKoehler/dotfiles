@@ -1,0 +1,123 @@
+
+return {
+  "Mofiqul/vscode.nvim",
+  lazy = false,
+  priority = 1000,
+
+    config = function()
+        vim.o.background = "dark"
+
+        local c = require("vscode.colors").get_colors()
+
+        require("vscode").setup({
+            transparent = false,
+            italic_comments = false,
+            italic_inlayhints = true,
+            underline_links = true,
+            disable_nvimtree_bg = true,
+            terminal_colors = true,
+
+        })
+
+        require("vscode").load()
+        vim.api.nvim_set_hl(0, "LineNr", { fg = "#AAAAAA", bg = c.vscBG })
+        vim.api.nvim_set_hl(0, "CursorLineNr", { fg = "#FFFFFF", bg = c.vscBG})
+        vim.api.nvim_set_hl(0, "Cursor", { fg = c.vscLightBlue, bg = c.vscLightBlue })
+        vim.api.nvim_set_hl(0, "lCursor", { fg = c.vscLightBlue, bg = c.vscLightBlue })
+    end,
+}
+
+
+-- return {
+
+    -- {
+    --     "erikbackman/brightburn.vim",
+    -- },
+    --
+    -- {
+    --     "folke/tokyonight.nvim",
+    --     lazy = false,
+    --     opts = {},
+    --     config = function()
+    --         ColorMyPencils()
+    --     end
+    -- },
+    -- {
+    --     "ellisonleao/gruvbox.nvim",
+    --     name = "gruvbox",
+    --     config = function()
+    --         require("gruvbox").setup({
+    --             terminal_colors = true, -- add neovim terminal colors
+    --             undercurl = true,
+    --             underline = false,
+    --             bold = true,
+    --             italic = {
+    --                 strings = false,
+    --                 emphasis = false,
+    --                 comments = false,
+    --                 operators = false,
+    --                 folds = false,
+    --             },
+    --             strikethrough = true,
+    --             invert_selection = false,
+    --             invert_signs = false,
+    --             invert_tabline = false,
+    --             invert_intend_guides = false,
+    --             inverse = true, -- invert background for search, diffs, statuslines and errors
+    --             contrast = "", -- can be "hard", "soft" or empty string
+    --             palette_overrides = {},
+    --             overrides = {},
+    --             dim_inactive = false,
+    --             transparent_mode = false,
+    --         })
+    --     end,
+    -- },
+    -- {
+    --     "folke/tokyonight.nvim",
+    --     config = function()
+    --         require("tokyonight").setup({
+    --             -- your configuration comes here
+    --             -- or leave it empty to use the default settings
+    --             style = "storm", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
+    --             transparent = false, -- Enable this to disable setting the background color
+    --             terminal_colors = true, -- Configure the colors used when opening a `:terminal` in Neovim
+    --             styles = {
+    --                 -- Style to be applied to different syntax groups
+    --                 -- Value is any valid attr-list value for `:help nvim_set_hl`
+    --                 comments = { italic = false },
+    --                 keywords = { italic = false },
+    --                 -- Background styles. Can be "dark", "transparent" or "normal"
+    --                 sidebars = "dark", -- style for sidebars, see below
+    --                 floats = "dark", -- style for floating windows
+    --             },
+    --         })
+    --     end
+    -- },
+
+    -- {
+    --     "rose-pine/neovim",
+    --     lazy = false,
+    --     name = "rose-pine",
+    --     priority = 1000,
+    --
+    --     config = function()
+    --         local palette = require("rose-pine.palette")
+    --         require('rose-pine').setup({
+    --             variant = "dawn", -- auto, main, moon, or dawn
+    --             dark_variant = "main", -- main, moon, or dawn
+    --             disable_background = false,
+    --             highlight_groups = {
+    --                 Cursor = { fg = 'palette.love', bg = 'palette.love' }
+    --             },
+    --             styles = {
+    --                 italic = false,
+    --             },
+    --         })
+    --         vim.cmd.colorscheme("rose-pine-dawn")
+    --
+    --
+    --     end
+    -- },
+    --
+
+-- }
