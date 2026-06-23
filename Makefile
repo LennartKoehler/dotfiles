@@ -1,27 +1,23 @@
-STOW_PACKAGES = nvim tmux kitty bash
+PACKAGES = bash nvim tmux kitty opencode
 STOW = stow --target=$(HOME) --dotfiles --no-folding
 
-.PHONY: all install deps link unlink update clean
+.PHONY: all install deps link unlink update clean install-%
 
-all: deps link
+all: install
 
 install: deps link
+	@echo ""
 	@echo "Setup complete. Run: source ~/.bashrc"
 
 deps:
-	@if ! command -v stow >/dev/null 2>&1; then \
-		echo "Installing stow..."; \
-		sudo apt-get update && sudo apt-get install -y stow; \
-	fi
-	@command -v nvim >/dev/null 2>&1 || echo "WARNING: neovim not installed"
-	@command -v tmux >/dev/null 2>&1 || echo "WARNING: tmux not installed"
-	@command -v kitty >/dev/null 2>&1 || echo "WARNING: kitty not installed"
-	@command -v rg >/dev/null 2>&1 || echo "WARNING: ripgrep not installed"
-	@command -v node >/dev/null 2>&1 || echo "WARNING: nodejs not installed"
+	@for pkg in $(PACKAGES); do \
+		echo "=== $$pkg ==="; \
+		./$$pkg/install.sh; \
+	done
 
 link:
-	@mkdir -p $(HOME)/.config $(HOME)/.local/bin $(HOME)/.bashrc.d
-	@for pkg in $(STOW_PACKAGES); do \
+	@mkdir -p $(HOME)/.config $(HOME)/.local/bin $(HOME)/.bashrc.d $(HOME)/.vim/undodir
+	@for pkg in nvim tmux kitty bash; do \
 		echo "Stowing $$pkg..."; \
 		$(STOW) $$pkg 2>/dev/null || echo "  (skipped or already linked)"; \
 	done
@@ -36,7 +32,7 @@ link:
 	@./scripts/setup-bashrc.sh
 
 unlink:
-	@for pkg in $(STOW_PACKAGES) opencode; do \
+	@for pkg in nvim tmux kitty bash opencode; do \
 		echo "Unstowing $$pkg..."; \
 		stow -D --target=$(HOME) --dotfiles $$pkg 2>/dev/null || true; \
 	done
@@ -45,13 +41,16 @@ update:
 	@echo "Pulling latest..."
 	@git pull --recurse-submodules
 	@git submodule update --remote --merge
-	@for pkg in $(STOW_PACKAGES); do \
+	@for pkg in nvim tmux kitty bash; do \
 		echo "Restowing $$pkg..."; \
 		stow -R --target=$(HOME) --dotfiles --no-folding $$pkg 2>/dev/null || true; \
 	done
 	@stow -R --target=$(HOME) --dotfiles opencode 2>/dev/null || true
 
 clean:
-	@for pkg in $(STOW_PACKAGES) opencode; do \
+	@for pkg in nvim tmux kitty bash opencode; do \
 		stow -D --target=$(HOME) --dotfiles $$pkg 2>/dev/null || true; \
 	done
+
+install-%:
+	@./$*/install.sh
