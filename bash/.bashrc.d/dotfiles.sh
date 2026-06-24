@@ -1,4 +1,4 @@
-export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 set -o vi
 
