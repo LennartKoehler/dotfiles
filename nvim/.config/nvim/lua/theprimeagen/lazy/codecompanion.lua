@@ -100,7 +100,7 @@ return {
                             api_key = "LOCAL_LLM_API_KEY",
                             base_url = "LOCAL_LLM_URL",
                         },
-                        url = "${base_url}",
+                        url = "${base_url}/chat/completions",
                         schema = {
                             model = {
                                 default = function()

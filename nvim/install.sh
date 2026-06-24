@@ -19,7 +19,7 @@ PKGS=(
     python3-venv
     python3-pip
 )
-
+sudo add-apt-repository ppa:neovim-ppa/unstable
 sudo apt-get update
 sudo apt-get install -y "${PKGS[@]}"
 
