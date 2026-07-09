@@ -1,0 +1,147 @@
+#!/bin/bash
+set -euo pipefail
+
+PACKAGES=(bash readline nvim tmux kitty opencode)
+STOW_BASE=(stow --target="$HOME" --dotfiles --ignore=install.sh)
+FRESH_MARK_DIR="/tmp/dotfiles-fresh-install"
+
+# opencode is a git submodule meant to be symlinked as a whole directory
+# (folding). node_modules must live inside that single symlink, so opencode
+# must NOT use --no-folding. Other packages use --no-folding to merge into
+# existing dirs.
+STOW_FOLDING_PKGS=(opencode)
+
+DOTFILES_ROOT="$(cd "$(dirname "$0")" && pwd)"
+
+
+is_folding_pkg() {
+    local pkg="$1"
+    for fp in "${STOW_FOLDING_PKGS[@]}"; do
+        [ "$pkg" = "$fp" ] && return 0
+    done
+    return 1
+}
+
+stow_pkg() {
+    local pkg="$1"
+    if [ "$pkg" = "opencode" ] && [ -f "$FRESH_MARK_DIR/opencode" ] && [ -e "$HOME/.config/opencode" ] && [ ! -L "$HOME/.config/opencode" ]; then
+        rm -rf "$HOME/.config/opencode"
+    fi
+    if is_folding_pkg "$pkg"; then
+        "${STOW_BASE[@]}" "$pkg" || true
+    else
+        "${STOW_BASE[@]}" --no-folding "$pkg" || true
+    fi
+}
+
+restow_pkg() {
+    local pkg="$1"
+    if is_folding_pkg "$pkg"; then
+        "${STOW_BASE[@]}" -R "$pkg" || true
+    else
+        "${STOW_BASE[@]}" -R --no-folding "$pkg" || true
+    fi
+}
+
+unstow_pkg() {
+    local pkg="$1"
+    stow -D --target="$HOME" --dotfiles "$pkg" || true
+}
+
+deps() {
+    rm -rf "$FRESH_MARK_DIR"
+    mkdir -p "$FRESH_MARK_DIR"
+    for pkg in "${PACKAGES[@]}"; do
+        echo "=== $pkg ==="
+        FRESH_MARK_DIR="$FRESH_MARK_DIR" "$DOTFILES_ROOT/$pkg/install.sh"
+    done
+}
+
+link() {
+    mkdir -p "$HOME/.config" "$HOME/.local/bin" "$HOME/.bashrc.d" "$HOME/.vim/undodir"
+    for pkg in "${PACKAGES[@]}"; do
+        if [ -f "$FRESH_MARK_DIR/$pkg" ]; then
+            echo "Fresh install: $pkg - clearing default configs..."
+            "$DOTFILES_ROOT/scripts/clear-defaults.sh" "$pkg"
+        fi
+        echo "Stowing $pkg..."
+        stow_pkg "$pkg"
+    done
+    "$DOTFILES_ROOT/scripts/setup-bashrc.sh"
+    rm -rf "$FRESH_MARK_DIR"
+}
+
+unlink() {
+    for pkg in "${PACKAGES[@]}"; do
+        echo "Unstowing $pkg..."
+        unstow_pkg "$pkg"
+    done
+}
+
+update() {
+    echo "Pulling latest..."
+    git pull --recurse-submodules
+    git submodule update --remote --merge
+    for pkg in "${PACKAGES[@]}"; do
+        echo "Restowing $pkg..."
+        restow_pkg "$pkg"
+    done
+}
+
+clean() {
+    for pkg in "${PACKAGES[@]}"; do
+        unstow_pkg "$pkg"
+    done
+}
+
+install_all() {
+    deps
+    link
+    echo ""
+    echo "Setup complete."
+    echo "Run 'source ~/.bashrc' to activate PATH changes."
+}
+
+install_pkg() {
+    local pkg="$1"
+    "$DOTFILES_ROOT/$pkg/install.sh"
+}
+
+usage() {
+    cat <<EOF
+Usage: ./setup <command> [package]
+
+Commands:
+  install [pkg]   Install deps + symlink all configs (or one package's deps)
+  deps            Check/install all dependencies
+  link            Stow all packages
+  unlink          Remove all symlinks
+  update          Pull latest + restow
+  clean           Remove all symlinks
+
+Packages: ${PACKAGES[*]}
+EOF
+}
+
+main() {
+    local cmd="${1:-}"
+    shift || true
+
+    case "$cmd" in
+        install)
+            if [ $# -gt 0 ]; then
+                install_pkg "$1"
+            else
+                install_all
+            fi
+            ;;
+        deps)   deps ;;
+        link)   link ;;
+        unlink) unlink ;;
+        update) update ;;
+        clean)  clean ;;
+        *)      usage; exit 1 ;;
+    esac
+}
+
+main "$@"

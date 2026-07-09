@@ -25,7 +25,7 @@ if ! command -v nvim >/dev/null 2>&1; then
     NEOVIM_FRESH=1
 fi
 
-sudo add-apt-repository ppa:neovim-ppa/unstable
+sudo add-apt-repository -y ppa:neovim-ppa/unstable
 sudo apt-get update
 sudo apt-get install -y "${PKGS[@]}"
 

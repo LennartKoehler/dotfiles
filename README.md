@@ -7,7 +7,7 @@ Personal development environment setup using [GNU Stow](https://www.gnu.org/soft
 ```bash
 git clone --recurse-submodules git@github.com:lennartkoehler/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-make install
+./setup install
 source ~/.bashrc
 ```
 
@@ -26,16 +26,17 @@ source ~/.bashrc
 Installs `stow` automatically. Other deps to install manually:
 - `neovim`, `tmux`, `kitty`, `ripgrep`, `nodejs`, `npm`, `xclip`
 
-## Make Targets
+## Setup Commands
 
-| Target    | Action                              |
-| --------- | ----------------------------------- |
-| `install` | Install stow + symlink all configs  |
-| `deps`    | Check/install dependencies          |
-| `link`    | Stow all packages                   |
-| `unlink`  | Remove all symlinks                 |
-| `update`  | Pull + restow                       |
-| `clean`   | Remove all symlinks                 |
+| Command             | Action                              |
+| ------------------- | ----------------------------------- |
+| `./setup install`   | Install deps + symlink all configs  |
+| `./setup deps`      | Check/install dependencies          |
+| `./setup link`      | Stow all packages                   |
+| `./setup unlink`    | Remove all symlinks                 |
+| `./setup update`    | Pull + restow                       |
+| `./setup clean`     | Remove all symlinks                 |
+| `./setup install <pkg>` | Run one package's install.sh   |
 
 ## Structure
 
@@ -52,8 +53,9 @@ dotfiles/
 │   └── .bashrc.d/
 ├── opencode/              # git submodule
 ├── scripts/
+│   ├── clear-defaults.sh
 │   └── setup-bashrc.sh
-└── Makefile
+└── setup
 ```
 
 ## opencode
@@ -63,4 +65,4 @@ It gets symlinked as a whole directory (`~/.config/opencode` -> `dotfiles/openco
 
 Skills are managed separately via `skills-lock.json` inside the submodule.
 
-If `~/.config/opencode` already exists as a real directory, `make link` will back it up before symlinking.
+If `~/.config/opencode` already exists as a real directory, `./setup link` will remove it before symlinking.

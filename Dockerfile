@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     unzip \
-    make \
     software-properties-common \
     && add-apt-repository universe \
     && rm -rf /var/lib/apt/lists/*
@@ -23,8 +22,5 @@ USER testuser
 WORKDIR /home/testuser/dotfiles
 
 COPY --chown=testuser:testuser . .
-
-# Full install — same as `make install` on a fresh machine
-RUN make install
 
 CMD ["bash"]
