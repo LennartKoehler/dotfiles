@@ -7,9 +7,4 @@
 nvim/.config/nvim/plugin/packer_compiled.lua
 nvim/.config/nvim/lua/theprimeagen/lazy/local.lua
 
-# opencode
-opencode/node_modules/
-opencode/package.json
-opencode/package-lock.json
-opencode/bun.lock
-opencode/opencode-notifier-state.json
+# opencode (config lives in the opencode submodule; it self-ignores node_modules)

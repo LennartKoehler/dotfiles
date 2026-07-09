@@ -8,6 +8,8 @@ if command -v kitty >/dev/null 2>&1; then
 else
     sudo apt-get update
     sudo apt-get install -y kitty
+    mkdir -p "${FRESH_MARK_DIR:-/tmp/dotfiles-fresh-install}"
+    touch "${FRESH_MARK_DIR:-/tmp/dotfiles-fresh-install}/kitty"
 fi
 
 echo "setting up desktop app"

@@ -7,6 +7,8 @@ if command -v opencode >/dev/null 2>&1; then
     echo "opencode already installed"
 else
     curl -fsSL https://opencode.ai/install | bash
+    mkdir -p "${FRESH_MARK_DIR:-/tmp/dotfiles-fresh-install}"
+    touch "${FRESH_MARK_DIR:-/tmp/dotfiles-fresh-install}/opencode"
 fi
 
 CONFIG_DIR="$(cd "$(dirname "$0")" && pwd)/.config/opencode"
