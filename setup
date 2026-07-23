@@ -95,6 +95,7 @@ clean() {
 }
 
 install_all() {
+    git submodule update --init --recursive
     deps
     link
     echo ""
