@@ -3,34 +3,62 @@
 
 
 if ! command -v tmux >/dev/null 2>&1; then
-echo "tmux not installed"
-return 1
+    echo "tmux not installed"
+    exit 1
 fi
 
-DIR_NAME=$(basename "$(pwd)")
+NAME="${1:-$(basename "$(pwd)")}"
 
-SESSION_NAME="dev_${DIR_NAME}"
-SESSION_NUMBER=0
-while tmux has-session -t "$SESSION_NAME" 2>/dev/null; do
-    SESSION_NUMBER=$((SESSION_NUMBER + 1))
-    SESSION_NAME="dev_${DIR_NAME}_${SESSION_NUMBER}"
-done
+# Attach if session already exists (preserve its color, don't bump counter)
+if tmux has-session -t "$NAME" 2>/dev/null; then
+    exec tmux attach -t "$NAME"
+fi
 
-# Create session + windows
+# ── Boot-aware session counter (deterministic palette) ───────────────
+# Resets at reboot so the first session after boot is always palette[0].
+COUNTER_FILE="/tmp/tmux_session_counter_$(id -u)"
+BOOT_TIME=$(awk '/^btime/{print $2}' /proc/stat)
+
+exec 9>"$COUNTER_FILE.lock"
+flock 9
+
+read -r SAVED_BOOT SAVED_INDEX 2>/dev/null < "$COUNTER_FILE" || { SAVED_BOOT=0; SAVED_INDEX=0; }
+
+if [ "$SAVED_BOOT" = "$BOOT_TIME" ]; then
+    INDEX=$SAVED_INDEX
+else
+    INDEX=0
+fi
+
+IDX=$((INDEX % 8))
+echo "$BOOT_TIME $((INDEX + 1))" > "$COUNTER_FILE"
+
+flock -u 9
+exec 9>&-
+
+# ── Palette: dark-tint bar + vivid badge ─────────────────────────────
+BAR_BG=("#001133" "#002211" "#2a002a" "#002b2b" "#2b2b00" "#2b1500" "#330000" "#1a002b")
+BADGE_BG=("#0088ff" "#00cc55" "#cc44cc" "#00cccc" "#dddd00" "#ff8800" "#ff4444" "#9966ff")
+BADGE_FG=("#ffffff" "#000000" "#ffffff" "#000000" "#000000" "#ffffff" "#ffffff" "#ffffff")
+
+# ── Create session + windows ─────────────────────────────────────────
 CONDA_ENV="${CONDA_DEFAULT_ENV:-base}"
 
-tmux new-session -d -s "$SESSION_NAME" -n nvim
-tmux new-window -t "$SESSION_NAME":2 -n build
-tmux new-window -t "$SESSION_NAME":3
+tmux new-session -d -s "$NAME" -n nvim
+tmux new-window -t "$NAME":2 -n build
+tmux new-window -t "$NAME":3
 
-tmux send-keys -t "$SESSION_NAME":1 "conda activate $CONDA_ENV" Enter
-tmux send-keys -t "$SESSION_NAME":2 "conda activate $CONDA_ENV" Enter
-tmux send-keys -t "$SESSION_NAME":3 "conda activate $CONDA_ENV" Enter
+tmux send-keys -t "$NAME":1 "conda activate $CONDA_ENV" Enter
+tmux send-keys -t "$NAME":2 "conda activate $CONDA_ENV" Enter
+tmux send-keys -t "$NAME":3 "conda activate $CONDA_ENV" Enter
 
-tmux send-keys -t "$SESSION_NAME":1 'nvim .' Enter
+tmux send-keys -t "$NAME":1 'nvim .' Enter
 
-tmux select-window -t "$SESSION_NAME":1
+tmux select-window -t "$NAME":1
 
-exec tmux attach -t "$SESSION_NAME"
+# ── Per-session styling (overrides global config for this session) ───
+tmux set-option -t "$NAME" status-left-length 50
+tmux set-option -t "$NAME" status-style "bg=${BAR_BG[$IDX]} fg=#ffffff"
+tmux set-option -t "$NAME" status-left "#[bg=${BADGE_BG[$IDX]} fg=${BADGE_FG[$IDX]} bold]  $NAME  #[default] "
 
-
+exec tmux attach -t "$NAME"
