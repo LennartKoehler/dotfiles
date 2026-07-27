@@ -57,8 +57,10 @@ tmux send-keys -t "$NAME":1 'nvim .' Enter
 tmux select-window -t "$NAME":1
 
 # ── Per-session styling (overrides global config for this session) ───
-tmux set-option -t "$NAME" status-left-length 50
+tmux set-option -t "$NAME" status-left-length 0
+tmux set-option -t "$NAME" status-right-length 50
 tmux set-option -t "$NAME" status-style "bg=${BAR_BG[$IDX]} fg=#ffffff"
-tmux set-option -t "$NAME" status-left "#[bg=${BADGE_BG[$IDX]} fg=${BADGE_FG[$IDX]} bold]  $NAME  #[default] "
+tmux set-option -t "$NAME" status-left ''
+tmux set-option -t "$NAME" status-right "#[bg=${BADGE_BG[$IDX]} fg=${BADGE_FG[$IDX]} bold]  $NAME  #[default] "
 
 exec tmux attach -t "$NAME"
