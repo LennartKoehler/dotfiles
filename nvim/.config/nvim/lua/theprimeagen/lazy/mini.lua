@@ -14,7 +14,10 @@ return{
                     local git = ""
                     if vim.fn.exists("*FugitiveHead") == 1 then
                         local head = vim.fn.FugitiveHead()
-                        if head ~= "" then git = " " .. head end
+                        if head ~= "" then
+                            local icon = require("codicons").get("git-branch", "icon")
+                            git = " " .. icon .. " " .. head
+                        end
                     end
 
                     return statusline.combine_groups({
