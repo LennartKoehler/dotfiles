@@ -48,6 +48,3 @@ vim.opt.isfname:append("@-@")
 vim.opt.updatetime = 50
 
 -- vim.opt.colorcolumn = "80"
-
--- remove line/col and Bot/Top from statusline
-vim.opt.statusline = "%f"
