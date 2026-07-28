@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PACKAGES=(bash readline nvim tmux kitty opencode)
-STOW_BASE=(stow --target="$HOME" --dotfiles --ignore=install.sh)
+STOW_BASE=(stow --target="$HOME" --dotfiles --ignore=install.sh --ignore=opencode-notifier-state.json)
 FRESH_MARK_DIR="/tmp/dotfiles-fresh-install"
 
 # opencode is a git submodule meant to be symlinked as a whole directory
@@ -60,7 +60,7 @@ deps() {
 link() {
     mkdir -p "$HOME/.config" "$HOME/.local/bin" "$HOME/.bashrc.d" "$HOME/.vim/undodir"
     for pkg in "${PACKAGES[@]}"; do
-        if [ -f "$FRESH_MARK_DIR/$pkg" ]; then
+        if [ -f "$FRESH_MARK_DIR/$pkg" ] && ! is_folding_pkg "$pkg"; then
             echo "Fresh install: $pkg - clearing default configs..."
             "$DOTFILES_ROOT/scripts/clear-defaults.sh" "$pkg"
         fi
