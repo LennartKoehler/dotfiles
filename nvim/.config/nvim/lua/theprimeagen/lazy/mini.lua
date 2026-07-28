@@ -21,9 +21,9 @@ return{
                     end
 
                     return statusline.combine_groups({
-                        { hl = "MiniStatuslineDevinfo",  strings = { git } },
+                        { hl = "MiniStatuslineDevinfo",  strings = { filename } },
                         "%<",
-                        { hl = "MiniStatuslineFilename", strings = { filename } },
+                        { hl = "MiniStatuslineFilename", strings = { git } },
                         "%=",
                     })
                 end,

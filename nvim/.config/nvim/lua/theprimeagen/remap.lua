@@ -47,7 +47,7 @@ vim.keymap.set("n", "<leader>Y", [["+Y]])
 vim.keymap.set({"n", "v"}, "<leader>cp", [["+p]])
 
 
-vim.keymap.set({'c'}, '<C-p>', function()
+vim.keymap.set({'c'}, '<leader><C-p>', function()
   local clip = vim.fn.getreg('+')
   -- remove leading colon if present
   clip = clip:gsub('^:', '')
