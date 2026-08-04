@@ -3,6 +3,14 @@ return {
 
     config = function()
         require("nvim-tree").setup({
+            on_attach = function(bufnr)
+                local function opts(desc)
+                    return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+                end
+                local api = require("nvim-tree.api")
+                api.config.mappings.default_on_attach(bufnr)
+                vim.keymap.set("n", "<CR>", api.node.open.tab_drop, opts("Tab drop"))
+            end,
             renderer = {
                 icons = {
                     show = {
