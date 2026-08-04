@@ -1,6 +1,6 @@
 vim.g.mapleader = " "
 vim.api.nvim_set_keymap('n', '<leader>E', '<cmd>lua vim.diagnostic.open_float()<CR>', { noremap=true, silent=true })
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+-- handled by nvim-tree.lua
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
