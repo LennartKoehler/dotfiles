@@ -21,7 +21,8 @@ return {
                     "python",
                     "markdown",
                     "markdown_inline",
-					"go",
+                    "go",
+                    "java",
 				},
 
 				-- Install parsers synchronously (only applied to `ensure_installed`)

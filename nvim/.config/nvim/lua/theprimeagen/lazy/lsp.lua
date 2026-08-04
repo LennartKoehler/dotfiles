@@ -37,6 +37,7 @@ return {
                 "clangd",
                 "basedpyright",
                 "clangd",
+                "jdtls",
             },
 
             handlers = {
@@ -104,6 +105,48 @@ return {
                                         reportAssignmentType = 'none',
                                     },
                                 },
+                            },
+                        },
+                    })
+                end,
+
+                ["jdtls"] = function()
+                    local lspconfig = require("lspconfig")
+                    local mason_registry = require("mason-registry")
+
+                    local bundles = {}
+
+                    local java_debug = mason_registry.get_package("java-debug-adapter")
+                    if java_debug:is_installed() then
+                        local path = java_debug:get_install_path()
+                        for _, jar in ipairs(vim.fn.glob(path .. "/server/com.microsoft.java.debug.plugin-*.jar", false, true)) do
+                            table.insert(bundles, jar)
+                        end
+                    end
+
+                    local java_test = mason_registry.get_package("java-test")
+                    if java_test:is_installed() then
+                        local path = java_test:get_install_path()
+                        for _, jar in ipairs(vim.fn.glob(path .. "/server/*.jar", false, true)) do
+                            table.insert(bundles, jar)
+                        end
+                    end
+
+                    lspconfig.jdtls.setup({
+                        capabilities = capabilities,
+                        root_dir = lspconfig.util.root_pattern(
+                            ".git", "mvnw", "gradlew", "pom.xml",
+                            "build.gradle", "build.gradle.kts",
+                            "settings.gradle", "settings.gradle.kts",
+                            "build.xml"
+                        ),
+                        init_options = {
+                            bundles = bundles,
+                        },
+                        settings = {
+                            java = {
+                                signatureHelp = { enabled = true },
+                                contentProvider = { preferred = 'fernflower' },
                             },
                         },
                     })

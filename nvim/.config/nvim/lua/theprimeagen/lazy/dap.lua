@@ -116,6 +116,54 @@ return {
             type = 'executable',
             command = "python3",
         }
+
+        dap.adapters.java = function(callback, config)
+            if config.request == 'attach' then
+                callback({
+                    type = 'server',
+                    host = config.hostName or '127.0.0.1',
+                    port = config.port,
+                })
+                return
+            end
+
+            local clients = vim.lsp.get_clients and vim.lsp.get_clients() or vim.lsp.get_active_clients()
+            local jdtls_client = nil
+            for _, client in ipairs(clients) do
+                if client.name == 'jdtls' then
+                    jdtls_client = client
+                    break
+                end
+            end
+            if not jdtls_client then
+                vim.notify('jdtls is not running', vim.log.levels.ERROR)
+                return
+            end
+            jdtls_client:request('workspace/executeCommand', {
+                command = 'vscode.java.startDebugSession',
+            }, function(err, port)
+                if err then
+                    vim.notify('Failed to start debug session: ' .. tostring(err), vim.log.levels.ERROR)
+                    return
+                end
+                callback({
+                    type = 'server',
+                    host = '127.0.0.1',
+                    port = port,
+                })
+            end)
+        end
+
+        dap.configurations.java = {
+            {
+                type = 'java',
+                request = 'attach',
+                name = 'Debug (Attach)',
+                hostName = '127.0.0.1',
+                port = 5005,
+            },
+        }
+
         dap.set_log_level("DEBUG")
         dap.defaults.fallback.focus_frame = false
         dap.defaults.fallback.exception_breakpoints = {"uncaught"}
@@ -308,6 +356,14 @@ return {
 
                 },
             })
+
+            local mason_registry = require("mason-registry")
+            for _, pkg_name in ipairs({ "java-debug-adapter", "java-test" }) do
+                local pkg = mason_registry.get_package(pkg_name)
+                if not pkg:is_installed() then
+                    pkg:install()
+                end
+            end
         end,
     },
 
