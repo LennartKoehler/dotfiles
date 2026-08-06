@@ -3,6 +3,11 @@ return {
 
     config = function()
         require("nvim-tree").setup({
+            actions = {
+                open_file = {
+                    quit_on_open = true,
+                },
+            },
             on_attach = function(bufnr)
                 local function opts(desc)
                     return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }

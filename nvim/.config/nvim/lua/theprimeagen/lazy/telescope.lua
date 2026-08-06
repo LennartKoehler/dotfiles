@@ -45,11 +45,10 @@ return {
                 },
                 mappings = {
                     i = {
-                        -- map actions.which_key to <C-h> (default: <C-/>)
-                        -- actions.which_key shows the mappings for your picker,
-                        -- e.g. git_{create, delete, ...}_branch for the git_branches picker
-                        -- ["<C-k>"] = "move_selection_next",
-                        -- ["<C-j>"] = "move_selection_previous"
+                        ["<CR>"] = function(prompt_bufnr)
+                            require('telescope.actions').select_default(prompt_bufnr)
+                            require("nvim-tree.api").tree.close()
+                        end,
                     }
                 }
             }
