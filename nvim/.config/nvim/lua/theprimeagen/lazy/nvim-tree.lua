@@ -3,6 +3,7 @@ return {
 
     config = function()
         require("nvim-tree").setup({
+            git = { ignore = false },
             view = {
                 float = {
                     enable = true,
