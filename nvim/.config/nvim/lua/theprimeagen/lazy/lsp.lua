@@ -13,6 +13,7 @@ return {
         "L3MON4D3/LuaSnip",
         "saadparwaiz1/cmp_luasnip",
         "j-hui/fidget.nvim",
+        "Hoffs/omnisharp-extended-lsp.nvim",
     },
     config = function()
         require("conform").setup({
@@ -38,6 +39,7 @@ return {
                 "basedpyright",
                 "clangd",
                 "jdtls",
+                "omnisharp",
             },
 
             handlers = {
@@ -149,6 +151,35 @@ return {
                                 contentProvider = { preferred = 'fernflower' },
                             },
                         },
+                    })
+                end,
+
+                ["omnisharp"] = function()
+                    local lspconfig = require("lspconfig")
+                    local omnisharp_ext = require("omnisharp_extended")
+                    lspconfig.omnisharp.setup({
+                        capabilities = capabilities,
+                        handlers = {
+                            ["textDocument/definition"] = omnisharp_ext.definition_handler,
+                            ["textDocument/typeDefinition"] = omnisharp_ext.type_definition_handler,
+                            ["textDocument/references"] = omnisharp_ext.references_handler,
+                            ["textDocument/implementation"] = omnisharp_ext.implementation_handler,
+                        },
+                        on_attach = function(_, bufnr)
+                            local opts = { buffer = bufnr, silent = true, noremap = true }
+                            vim.keymap.set("n", "gd", function()
+                                omnisharp_ext.lsp_definition()
+                            end, opts)
+                            vim.keymap.set("n", "gD", function()
+                                omnisharp_ext.lsp_type_definition()
+                            end, opts)
+                            vim.keymap.set("n", "gr", function()
+                                omnisharp_ext.lsp_references()
+                            end, opts)
+                            vim.keymap.set("n", "gI", function()
+                                omnisharp_ext.lsp_implementation()
+                            end, opts)
+                        end,
                     })
                 end,
 
