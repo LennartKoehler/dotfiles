@@ -45,7 +45,7 @@ BADGE_FG=("#ffffff" "#000000" "#ffffff" "#000000" "#000000" "#ffffff" "#ffffff" 
 CONDA_ENV="${CONDA_DEFAULT_ENV:-base}"
 
 tmux new-session -d -s "$NAME" -n nvim
-tmux new-window -t "$NAME":2 -n build
+tmux new-window -t "$NAME":2
 tmux new-window -t "$NAME":3
 
 tmux send-keys -t "$NAME":1 "conda activate $CONDA_ENV" Enter
