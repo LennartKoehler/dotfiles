@@ -39,6 +39,14 @@ autocmd('TextYankPost', {
         })
     end,
 })
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = {"csv", "tsv"},
+  desc = "Enable CSV View on .csv files",
+  callback = function()
+    vim.opt_local.wrap = false
+    require("csvview").enable()
+  end,
+})
 
 autocmd({"BufWritePre"}, {
     group = ThePrimeagenGroup,
