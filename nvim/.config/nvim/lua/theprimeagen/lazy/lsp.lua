@@ -42,6 +42,10 @@ return {
                 "omnisharp",
             },
 
+            automatic_enable = {
+                exclude = { "omnisharp" },
+            },
+
             handlers = {
                 function(server_name) -- default handler
                     if server_name ~= "clangd" then
@@ -154,35 +158,6 @@ return {
                     })
                 end,
 
-                ["omnisharp"] = function()
-                    local lspconfig = require("lspconfig")
-                    local omnisharp_ext = require("omnisharp_extended")
-                    lspconfig.omnisharp.setup({
-                        capabilities = capabilities,
-                        handlers = {
-                            ["textDocument/definition"] = omnisharp_ext.definition_handler,
-                            ["textDocument/typeDefinition"] = omnisharp_ext.type_definition_handler,
-                            ["textDocument/references"] = omnisharp_ext.references_handler,
-                            ["textDocument/implementation"] = omnisharp_ext.implementation_handler,
-                        },
-                        on_attach = function(_, bufnr)
-                            local opts = { buffer = bufnr, silent = true, noremap = true }
-                            vim.keymap.set("n", "gd", function()
-                                omnisharp_ext.lsp_definition()
-                            end, opts)
-                            vim.keymap.set("n", "gD", function()
-                                omnisharp_ext.lsp_type_definition()
-                            end, opts)
-                            vim.keymap.set("n", "gr", function()
-                                omnisharp_ext.lsp_references()
-                            end, opts)
-                            vim.keymap.set("n", "gI", function()
-                                omnisharp_ext.lsp_implementation()
-                            end, opts)
-                        end,
-                    })
-                end,
-
                 ["lua_ls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.lua_ls.setup {
@@ -220,6 +195,68 @@ return {
                 end,
             }
         })
+
+        local omnisharp_ext = require("omnisharp_extended")
+        local omnisharp_rpc = require("vim.lsp.rpc")
+
+        -- OmniSharp can only load projects via the .NET-SDK MSBuild. Legacy
+        -- non-SDK projects (e.g. .NET Framework 4.x WinForms) fail to load and
+        -- give no navigation. A project can ship an SDK-style wrapper solution
+        -- under <root>/.lsp/*.lsp.sln that references the real sources in place;
+        -- when present we point OmniSharp at it with -s (the only steering
+        -- lever in LSP mode). Without it, the stock command is used.
+        local function omnisharp_cmd(dispatchers, config)
+            local cmd = {
+                "OmniSharp",
+                "-z",
+                "--hostPID",
+                tostring(vim.fn.getpid()),
+                "DotNet:enablePackageRestore=false",
+                "--encoding",
+                "utf-8",
+            }
+            local root = config.root_dir
+            if root then
+                local wrappers = vim.fn.glob(root .. "/.lsp/*.lsp.sln", false, true)
+                if #wrappers > 0 then
+                    table.insert(cmd, "-s")
+                    table.insert(cmd, wrappers[1])
+                end
+            end
+            table.insert(cmd, "--languageserver")
+            return omnisharp_rpc.start(cmd, dispatchers, {
+                cwd = config.cmd_cwd,
+                env = config.cmd_env,
+                detached = config.detached,
+            })
+        end
+
+        vim.lsp.config("omnisharp", {
+            cmd = omnisharp_cmd,
+            capabilities = capabilities,
+            handlers = {
+                ["textDocument/definition"] = omnisharp_ext.definition_handler,
+                ["textDocument/typeDefinition"] = omnisharp_ext.type_definition_handler,
+                ["textDocument/references"] = omnisharp_ext.references_handler,
+                ["textDocument/implementation"] = omnisharp_ext.implementation_handler,
+            },
+            on_attach = function(_, bufnr)
+                local opts = { buffer = bufnr, silent = true, noremap = true }
+                vim.keymap.set("n", "gd", function()
+                    omnisharp_ext.lsp_definition()
+                end, opts)
+                vim.keymap.set("n", "gD", function()
+                    omnisharp_ext.lsp_type_definition()
+                end, opts)
+                vim.keymap.set("n", "gr", function()
+                    omnisharp_ext.lsp_references()
+                end, opts)
+                vim.keymap.set("n", "gI", function()
+                    omnisharp_ext.lsp_implementation()
+                end, opts)
+            end,
+        })
+        vim.lsp.enable("omnisharp")
 
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
