@@ -23,29 +23,33 @@ is_folding_pkg() {
 }
 
 stow_pkg() {
-    local pkg="$1"
+    local pkg="$1" out
     if [ "$pkg" = "opencode" ] && [ -f "$FRESH_MARK_DIR/opencode" ] && [ -e "$HOME/.config/opencode" ] && [ ! -L "$HOME/.config/opencode" ]; then
         rm -rf "$HOME/.config/opencode"
     fi
     if is_folding_pkg "$pkg"; then
-        "${STOW_BASE[@]}" "$pkg" || true
+        out="$("${STOW_BASE[@]}" "$pkg" 2>&1)" || { printf 'ERROR stowing %s:\n%s\n' "$pkg" "$out"; return 1; }
     else
-        "${STOW_BASE[@]}" --no-folding "$pkg" || true
+        out="$("${STOW_BASE[@]}" --no-folding "$pkg" 2>&1)" || { printf 'ERROR stowing %s:\n%s\n' "$pkg" "$out"; return 1; }
     fi
 }
 
 restow_pkg() {
-    local pkg="$1"
+    local pkg="$1" out
     if is_folding_pkg "$pkg"; then
-        "${STOW_BASE[@]}" -R "$pkg" || true
+        out="$("${STOW_BASE[@]}" -R "$pkg" 2>&1)" || { printf 'ERROR restowing %s:\n%s\n' "$pkg" "$out"; return 1; }
     else
-        "${STOW_BASE[@]}" -R --no-folding "$pkg" || true
+        out="$("${STOW_BASE[@]}" -R --no-folding "$pkg" 2>&1)" || { printf 'ERROR restowing %s:\n%s\n' "$pkg" "$out"; return 1; }
     fi
 }
 
 unstow_pkg() {
-    local pkg="$1"
-    stow -D --target="$HOME" --dotfiles "$pkg" || true
+    local pkg="$1" out
+    if is_folding_pkg "$pkg"; then
+        out="$("${STOW_BASE[@]}" -D "$pkg" 2>&1)" || { printf 'ERROR unstowing %s:\n%s\n' "$pkg" "$out"; return 1; }
+    else
+        out="$("${STOW_BASE[@]}" -D --no-folding "$pkg" 2>&1)" || { printf 'ERROR unstowing %s:\n%s\n' "$pkg" "$out"; return 1; }
+    fi
 }
 
 deps() {
@@ -59,16 +63,21 @@ deps() {
 
 link() {
     mkdir -p "$HOME/.config" "$HOME/.local/bin" "$HOME/.bashrc.d" "$HOME/.vim/undodir"
+    local failed=0
     for pkg in "${PACKAGES[@]}"; do
         if [ -f "$FRESH_MARK_DIR/$pkg" ] && ! is_folding_pkg "$pkg"; then
             echo "Fresh install: $pkg - clearing default configs..."
             "$DOTFILES_ROOT/scripts/clear-defaults.sh" "$pkg"
         fi
         echo "Stowing $pkg..."
-        stow_pkg "$pkg"
+        stow_pkg "$pkg" || failed=1
     done
     "$DOTFILES_ROOT/scripts/setup-bashrc.sh"
     rm -rf "$FRESH_MARK_DIR"
+    if [ "$failed" -ne 0 ]; then
+        echo "One or more packages failed to stow. Fix conflicts above and re-run."
+        exit 1
+    fi
 }
 
 unlink() {
