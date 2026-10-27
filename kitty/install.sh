@@ -27,10 +27,10 @@ else
     echo 'kitty.desktop' > ~/.config/xdg-terminals.list
 fi
 
-THEME=https://raw.githubusercontent.com/dexpota/kitty-themes/master/themes/3024_Day.conf
+THEME=https://raw.githubusercontent.com/dexpota/kitty-themes/master/themes/gruvbox_dark.conf
 wget "$THEME" -P ~/.config/kitty/kitty-themes/themes
 cd ~/.config/kitty
-ln -s ./kitty-themes/themes/GruvBox_DarkHard.conf ~/.config/kitty/theme.conf
+ln -s ./kitty-themes/themes/gruvbox_dark.conf ~/.config/kitty/theme.conf
 
 echo "Installing JetBrainsMono Nerd Font..."
 FONT_DIR="$HOME/.local/share/fonts"
