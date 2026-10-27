@@ -33,7 +33,7 @@ autocmd('TextYankPost', {
     group = yank_group,
     pattern = '*',
     callback = function()
-        vim.highlight.on_yank({
+        vim.hl.hl_op({
             higroup = 'IncSearch',
             timeout = 40,
         })
@@ -132,7 +132,7 @@ vim.cmd('highlight! TabLineFill guibg=NONE guifg=white')
 
 
 -- vim.opt.conceallevel = 2
-vim.highlight.priorities.semantic_tokens = 95
+vim.hl.priorities.semantic_tokens = 95
 
 local function toggle_connected_comments()
   local cs = vim.bo.commentstring:gsub("%%s", ""):gsub("%s+$", "")
