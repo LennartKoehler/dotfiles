@@ -19,6 +19,7 @@ source ~/.bashrc
 | tmux     | `~/.tmux.conf`, `~/.local/bin/tmux_*` |
 | kitty    | `~/.config/kitty/kitty.conf`       |
 | bash     | `~/.bashrc.d/dotfiles.sh`          |
+| git      | `~/.gitconfig`                     |
 | opencode | `~/.config/opencode/` (submodule)  |
 
 ## Prerequisites
@@ -51,6 +52,8 @@ dotfiles/
 │   └── .config/kitty/
 ├── bash/                  # stow package
 │   └── .bashrc.d/
+├── git/                   # stow package
+│   └── .gitconfig
 ├── opencode/              # git submodule
 ├── scripts/
 │   ├── clear-defaults.sh

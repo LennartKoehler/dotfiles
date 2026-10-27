@@ -1,0 +1,11 @@
+[user]
+	name = LennartKoehler
+	email = koehlerlenny@gmail.com
+[core]
+	editor = nvim -f
+	autocrlf = input
+[credential "https://github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential
+[pull]
+	rebase = false
