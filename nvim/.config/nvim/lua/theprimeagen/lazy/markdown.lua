@@ -8,6 +8,15 @@ return {
     ---@type render.md.UserConfig
     ft = { "markdown", "codecompanion" },
     opts = {
+        -- Skip telescope's preview buffer (buftype=nofile, bufhidden=wipe).
+        -- It is recreated/rewritten on every selection, and render-markdown's
+        -- cached tree/node refs dangle across that churn -> treesitter
+        -- "attempt to call method 'range' (a nil value)".
+        -- Scoped to 'nofile' so real .md files (buftype='') and codecompanion
+        -- (buftype='acwrite') still render.
+        ignore = function(buf)
+            return vim.bo[buf].buftype == 'nofile'
+        end,
 
         link = {
             enabled = false
